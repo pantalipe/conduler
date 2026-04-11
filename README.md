@@ -1,19 +1,19 @@
 # conduler
 
-Agendador de publicacao de videos curtos para Instagram Reels, YouTube Shorts e TikTok.
+Local scheduler for publishing short videos to Instagram Reels, YouTube Shorts and TikTok.
 
-Projeto separado do [Rotman](../rotman) — o Rotman gera o video, o conduler agenda e publica.
+Companion project to [Rotman](../rotman) — Rotman generates the video, conduler schedules and publishes it.
 
-## Requisitos
+## Requirements
 
 - Python 3.8+
-- Sem dependencias externas (stdlib apenas)
+- No external dependencies (stdlib only)
 
-## Como usar
+## Getting started
 
-### 1. Configurar credenciais
+### 1. Set credentials
 
-Edite `config.py` ou defina variaveis de ambiente:
+Edit `config.py` or set environment variables before starting:
 
 ```
 INSTAGRAM_APP_ID        INSTAGRAM_APP_SECRET
@@ -21,67 +21,65 @@ YOUTUBE_CLIENT_ID       YOUTUBE_CLIENT_SECRET
 TIKTOK_CLIENT_KEY       TIKTOK_CLIENT_SECRET
 ```
 
-### 2. Iniciar o servidor
+### 2. Start the server
 
 ```bash
 python main.py
 ```
 
-Acesse: http://127.0.0.1:7071
+Open: http://127.0.0.1:7071
 
-### 3. Autenticar as plataformas
+### 3. Authenticate platforms
 
-Na aba **Autenticacao**, clique em **Conectar** para cada plataforma.
-O fluxo OAuth abre no browser e salva o token em `auth/tokens.json` (gitignored).
+Go to the **Authentication** tab and click **Connect** for each platform.
+The OAuth flow opens in the browser and saves the token to `auth/tokens.json` (gitignored).
 
-### 4. Agendar um video
+### 4. Schedule a video
 
-- Coloque o video na pasta monitorada (padrao: `watch_input/`, configuravel via `WATCH_FOLDER`)
-- Na aba **Agendar**, selecione o arquivo, preencha titulo/descricao e escolha o horario
-- O Scheduler verifica a fila a cada 15 segundos e publica quando o horario chegar
+- Drop a video into the watch folder (default: `watch_input/`, configurable via `WATCH_FOLDER`)
+- In the **Schedule** tab, select the file, fill in title/description and pick a publish time
+- The scheduler checks the queue every 15 seconds and publishes when the time comes
 
-## Estrutura
+## Project structure
 
 ```
 conduler/
-├── main.py              # servidor HTTP + entrypoint
-├── watcher.py           # monitora a pasta de videos
-├── scheduler.py         # fila de jobs + engine de agendamento
-├── publisher_router.py  # despacha jobs para cada plataforma
-├── config.py            # configuracoes centrais
+├── main.py              # HTTP server + entrypoint
+├── watcher.py           # watches the video input folder
+├── scheduler.py         # job queue + scheduling engine
+├── publisher_router.py  # dispatches jobs to each platform
+├── config.py            # central configuration
 ├── publishers/
 │   ├── instagram.py     # Graph API v21
 │   ├── youtube.py       # Data API v3
 │   └── tiktok.py        # Content Posting API v2
 ├── auth/
-│   └── oauth_flow.py    # fluxo OAuth via urllib
+│   └── oauth_flow.py    # OAuth flow via urllib
 ├── ui/
-│   └── index.html       # interface web
-├── watch_input/         # pasta monitorada (gitignored)
-└── jobs.example.json    # exemplo de jobs.json
+│   └── index.html       # web interface
+├── watch_input/         # monitored folder (gitignored)
+└── jobs.example.json    # sample jobs.json
 ```
 
-## Portas
+## Ports
 
-| Servico                     | Porta |
-|-----------------------------|-------|
-| conduler (UI/API)            | 7071  |
-| Rotman                      | 7070  |
-| OAuth callback (temporario) | 7072  |
+| Service                      | Port |
+|------------------------------|------|
+| conduler (UI / API)          | 7071 |
+| Rotman                       | 7070 |
+| OAuth callback (temporary)   | 7072 |
 
-## Observacoes sobre as APIs
+## API notes
 
-**Instagram** exige que o video esteja disponivel em uma URL publica no momento da publicacao
-(campo `video_url` no job). Para testes, use ngrok ou servico de hospedagem temporaria.
+**Instagram** requires the video to be available at a public URL at publish time (the `video_url` field on the job). For local testing, use ngrok or a temporary hosting service.
 
-**YouTube** faz o upload diretamente do arquivo local — sem necessidade de URL publica.
+**YouTube** uploads directly from the local file — no public URL needed.
 
-**TikTok** exige aprovacao do app no portal de desenvolvedores. O fluxo esta implementado
-mas so funciona com um app aprovado.
+**TikTok** requires app approval through the developer portal. The flow is fully implemented but only works with an approved app.
 
 ## Roadmap
 
-- [ ] Suporte a upload direto para Instagram (sem URL publica)
-- [ ] Refresh automatico de tokens expirados
-- [ ] Notificacao por webhook apos publicacao
-- [ ] Integracao direta com o Rotman via pasta compartilhada
+- [ ] Direct upload support for Instagram (no public URL required)
+- [ ] Automatic token refresh on expiry
+- [ ] Webhook notification after publishing
+- [ ] Direct integration with Rotman via shared output folder

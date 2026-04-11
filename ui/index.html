@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -118,121 +118,121 @@
   <aside class="sidebar">
     <div class="sidebar-logo">condu<span>ler</span></div>
     <div class="nav-item active" data-page="schedule">
-      <span class="nav-icon">&#128197;</span> Agendar
+      <span class="nav-icon">&#128197;</span> Schedule
     </div>
     <div class="nav-item" data-page="jobs">
       <span class="nav-icon">&#128203;</span> Jobs
     </div>
     <div class="nav-item" data-page="watch">
-      <span class="nav-icon">&#128193;</span> Pasta monitorada
+      <span class="nav-icon">&#128193;</span> Watch folder
     </div>
     <div class="nav-item" data-page="auth">
-      <span class="nav-icon">&#128273;</span> Autenticacao
+      <span class="nav-icon">&#128273;</span> Authentication
     </div>
   </aside>
 
   <main class="main">
 
-    <!-- Agendar -->
+    <!-- Schedule -->
     <div class="page active" id="page-schedule">
       <div class="page-header">
-        <h1>Novo agendamento</h1>
-        <p>Selecione o video, preencha os dados e escolha o horario de publicacao.</p>
+        <h1>New scheduled post</h1>
+        <p>Select a video, fill in the details and pick a publish time.</p>
       </div>
       <div class="card">
         <div class="form-group">
-          <label>Arquivo de video</label>
+          <label>Video file</label>
           <select id="sched-file" style="cursor:pointer"></select>
         </div>
         <div class="grid2">
           <div class="form-group">
-            <label>Titulo</label>
-            <input id="sched-title" type="text" placeholder="Titulo do post">
+            <label>Title</label>
+            <input id="sched-title" type="text" placeholder="Post title">
           </div>
           <div class="form-group">
-            <label>Publicar em</label>
+            <label>Publish at</label>
             <input id="sched-datetime" type="datetime-local">
           </div>
         </div>
         <div class="form-group">
-          <label>Descricao / Legenda</label>
-          <textarea id="sched-desc" placeholder="Texto do post, hashtags..."></textarea>
+          <label>Description / Caption</label>
+          <textarea id="sched-desc" placeholder="Post text, hashtags..."></textarea>
         </div>
         <div class="form-group">
-          <label>Tags (separadas por virgula)</label>
+          <label>Tags (comma-separated)</label>
           <input id="sched-tags" type="text" placeholder="shorts, bitcoin, crypto">
         </div>
         <div class="form-group">
-          <label>Plataformas</label>
+          <label>Platforms</label>
           <div class="platform-checks">
             <div class="plat-btn" data-plat="instagram" onclick="togglePlat(this)">&#128248; Instagram</div>
             <div class="plat-btn" data-plat="youtube"   onclick="togglePlat(this)">&#9654; YouTube</div>
             <div class="plat-btn" data-plat="tiktok"    onclick="togglePlat(this)">&#9835; TikTok</div>
           </div>
         </div>
-        <button class="btn btn-primary" onclick="createJob()">Agendar publicacao</button>
+        <button class="btn btn-primary" onclick="createJob()">Schedule post</button>
       </div>
     </div>
 
     <!-- Jobs -->
     <div class="page" id="page-jobs">
       <div class="page-header">
-        <h1>Jobs agendados</h1>
-        <p>Acompanhe o status de cada publicacao.</p>
+        <h1>Scheduled jobs</h1>
+        <p>Track the status of each scheduled post.</p>
       </div>
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-        <button class="btn btn-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" onclick="loadJobs()">Atualizar</button>
-        <button class="btn btn-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" onclick="loadJobs('pending')">Pendentes</button>
-        <button class="btn btn-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" onclick="loadJobs('done')">Concluidos</button>
-        <button class="btn btn-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" onclick="loadJobs('failed')">Falhos</button>
+        <button class="btn btn-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" onclick="loadJobs()">Refresh</button>
+        <button class="btn btn-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" onclick="loadJobs('pending')">Pending</button>
+        <button class="btn btn-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" onclick="loadJobs('done')">Done</button>
+        <button class="btn btn-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" onclick="loadJobs('failed')">Failed</button>
       </div>
       <div class="card" id="jobs-container">
         <div class="empty"><span class="spinner"></span></div>
       </div>
     </div>
 
-    <!-- Pasta monitorada -->
+    <!-- Watch folder -->
     <div class="page" id="page-watch">
       <div class="page-header">
-        <h1>Pasta monitorada</h1>
-        <p>Videos detectados automaticamente pelo watcher.</p>
+        <h1>Watch folder</h1>
+        <p>Videos automatically detected by the watcher.</p>
       </div>
       <div class="card" id="watch-container">
         <div class="empty"><span class="spinner"></span></div>
       </div>
     </div>
 
-    <!-- Autenticacao -->
+    <!-- Authentication -->
     <div class="page" id="page-auth">
       <div class="page-header">
-        <h1>Autenticacao OAuth</h1>
-        <p>Conecte suas contas para permitir a publicacao automatica.</p>
+        <h1>OAuth authentication</h1>
+        <p>Connect your accounts to enable automatic publishing.</p>
       </div>
       <div class="auth-grid">
         <div class="auth-card">
           <div class="auth-icon">&#128248;</div>
           <div class="plat-name" style="color:var(--ig)">Instagram</div>
-          <div class="plat-status" id="status-instagram">Verificando...</div>
-          <button class="btn-connect" id="btn-instagram" onclick="connectPlatform('instagram')">Conectar</button>
+          <div class="plat-status" id="status-instagram">Checking...</div>
+          <button class="btn-connect" id="btn-instagram" onclick="connectPlatform('instagram')">Connect</button>
         </div>
         <div class="auth-card">
           <div class="auth-icon">&#9654;</div>
           <div class="plat-name" style="color:var(--yt)">YouTube</div>
-          <div class="plat-status" id="status-youtube">Verificando...</div>
-          <button class="btn-connect" id="btn-youtube" onclick="connectPlatform('youtube')">Conectar</button>
+          <div class="plat-status" id="status-youtube">Checking...</div>
+          <button class="btn-connect" id="btn-youtube" onclick="connectPlatform('youtube')">Connect</button>
         </div>
         <div class="auth-card">
           <div class="auth-icon">&#9835;</div>
           <div class="plat-name" style="color:var(--tt)">TikTok</div>
-          <div class="plat-status" id="status-tiktok">Verificando...</div>
-          <button class="btn-connect" id="btn-tiktok" onclick="connectPlatform('tiktok')">Conectar</button>
+          <div class="plat-status" id="status-tiktok">Checking...</div>
+          <button class="btn-connect" id="btn-tiktok" onclick="connectPlatform('tiktok')">Connect</button>
         </div>
       </div>
       <div class="card" style="margin-top:20px">
         <p style="color:var(--muted);font-size:13px;line-height:1.7">
-          <strong style="color:var(--text)">Configuracao:</strong> Preencha as credenciais em
+          <strong style="color:var(--text)">Setup:</strong> Fill in your app credentials in
           <code style="background:var(--bg3);padding:1px 6px;border-radius:4px">config.py</code>
-          ou defina as variaveis de ambiente antes de iniciar:<br><br>
+          or set environment variables before starting the server:<br><br>
           <code style="background:var(--bg3);padding:6px 10px;border-radius:6px;display:block;font-size:12px;line-height:2">
             INSTAGRAM_APP_ID &nbsp;&nbsp;&nbsp;&nbsp; INSTAGRAM_APP_SECRET<br>
             YOUTUBE_CLIENT_ID &nbsp;&nbsp;&nbsp; YOUTUBE_CLIENT_SECRET<br>
@@ -275,7 +275,7 @@ function toast(msg, color='var(--text)') {
 function fmtDate(iso) {
   if (!iso) return '-';
   const d = new Date(iso);
-  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  return d.toLocaleDateString('en-GB') + ' ' + d.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
 }
 function platDot(p) {
   if (p === 'instagram') return '<span class="dot-ig">&#9679;</span>';
@@ -294,9 +294,9 @@ async function loadWatchFiles() {
     const sel = document.getElementById('sched-file');
     sel.innerHTML = d.files.length
       ? d.files.map(f => '<option value="' + d.folder + '/' + f + '">' + f + '</option>').join('')
-      : '<option value="">- nenhum video na pasta -</option>';
+      : '<option value="">— no videos in watch folder —</option>';
   } catch(e) {
-    document.getElementById('sched-file').innerHTML = '<option>Servidor offline</option>';
+    document.getElementById('sched-file').innerHTML = '<option>Server offline</option>';
   }
 }
 
@@ -321,9 +321,9 @@ async function createJob() {
   const dtLocal   = document.getElementById('sched-datetime').value;
   const platforms = [..._selectedPlats];
 
-  if (!videoPath)      return toast('Selecione um video.', 'var(--red)');
-  if (!dtLocal)        return toast('Defina o horario de publicacao.', 'var(--red)');
-  if (!platforms.length) return toast('Selecione pelo menos uma plataforma.', 'var(--red)');
+  if (!videoPath)        return toast('Select a video file.', 'var(--red)');
+  if (!dtLocal)          return toast('Set a publish time.', 'var(--red)');
+  if (!platforms.length) return toast('Select at least one platform.', 'var(--red)');
 
   const scheduledAt = new Date(dtLocal).toISOString();
   const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
@@ -336,12 +336,12 @@ async function createJob() {
     });
     const d = await r.json();
     if (r.ok) {
-      toast('Job criado! ID: ' + d.id.slice(0,8), 'var(--green)');
+      toast('Job created! ID: ' + d.id.slice(0, 8), 'var(--green)');
     } else {
-      toast('Erro: ' + d.error, 'var(--red)');
+      toast('Error: ' + d.error, 'var(--red)');
     }
   } catch(e) {
-    toast('Servidor offline.', 'var(--red)');
+    toast('Server offline.', 'var(--red)');
   }
 }
 
@@ -353,14 +353,14 @@ async function loadJobs(status) {
     const r = await fetch(url);
     const d = await r.json();
     if (!d.jobs.length) {
-      el.innerHTML = '<div class="empty">Nenhum job encontrado.</div>';
+      el.innerHTML = '<div class="empty">No jobs found.</div>';
       return;
     }
     el.innerHTML = d.jobs.map(j => {
-      const name = j.title || j.video_path.split(/[\\\/]/).pop();
-      const plats = j.platforms.map(platDot).join(' ');
+      const name   = j.title || j.video_path.split(/[\\\/]/).pop();
+      const plats  = j.platforms.map(platDot).join(' ');
       const cancel = j.status === 'pending'
-        ? '<button class="btn btn-danger" onclick="cancelJob(\'' + j.id + '\')">Cancelar</button>'
+        ? '<button class="btn btn-danger" onclick="cancelJob(\'' + j.id + '\')">Cancel</button>'
         : '';
       return '<div class="job-row">'
         + '<div>'
@@ -372,7 +372,7 @@ async function loadJobs(status) {
         + '</div>';
     }).join('');
   } catch(e) {
-    el.innerHTML = '<div class="empty">Servidor offline.</div>';
+    el.innerHTML = '<div class="empty">Server offline.</div>';
   }
 }
 
@@ -381,13 +381,13 @@ async function cancelJob(id) {
     const r = await fetch(API + '/api/jobs/' + id, { method: 'DELETE' });
     const d = await r.json();
     if (r.ok) {
-      toast('Job cancelado.', 'var(--amber)');
+      toast('Job cancelled.', 'var(--amber)');
       loadJobs();
     } else {
       toast(d.error, 'var(--red)');
     }
   } catch(e) {
-    toast('Servidor offline.', 'var(--red)');
+    toast('Server offline.', 'var(--red)');
   }
 }
 
@@ -399,15 +399,15 @@ async function loadWatchFolder() {
     const d = await r.json();
     const fileRows = d.files.length
       ? d.files.map(f => '<div class="file-item"><span class="file-name">' + f + '</span></div>').join('')
-      : '<div class="empty">Nenhum video na pasta.</div>';
+      : '<div class="empty">No videos in watch folder.</div>';
     el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
-      + '<span style="font-size:13px;font-weight:500">' + d.files.length + ' video(s) detectado(s)</span>'
-      + '<button class="btn btn-sm" style="background:var(--bg3);border:1px solid var(--border);color:var(--text)" onclick="loadWatchFolder()">Atualizar</button>'
+      + '<span style="font-size:13px;font-weight:500">' + d.files.length + ' video(s) detected</span>'
+      + '<button class="btn btn-sm" style="background:var(--bg3);border:1px solid var(--border);color:var(--text)" onclick="loadWatchFolder()">Refresh</button>'
       + '</div>'
       + '<div class="folder-path">' + d.folder + '</div>'
       + '<div class="file-list">' + fileRows + '</div>';
   } catch(e) {
-    el.innerHTML = '<div class="empty">Servidor offline.</div>';
+    el.innerHTML = '<div class="empty">Server offline.</div>';
   }
 }
 
@@ -415,16 +415,16 @@ async function loadAuthStatus() {
   try {
     const r = await fetch(API + '/api/auth/status');
     const d = await r.json();
-    ['instagram','youtube','tiktok'].forEach(p => {
+    ['instagram', 'youtube', 'tiktok'].forEach(p => {
       const connected = d[p];
-      document.getElementById('status-' + p).textContent = connected ? '● Conectado' : '○ Nao conectado';
+      document.getElementById('status-' + p).textContent = connected ? '● Connected' : '○ Not connected';
       document.getElementById('status-' + p).className   = 'plat-status' + (connected ? ' connected' : '');
-      document.getElementById('btn-' + p).textContent    = connected ? 'Reconectar' : 'Conectar';
+      document.getElementById('btn-' + p).textContent    = connected ? 'Reconnect' : 'Connect';
       document.getElementById('btn-' + p).className      = 'btn-connect' + (connected ? ' connected' : '');
     });
   } catch(e) {
-    ['instagram','youtube','tiktok'].forEach(p => {
-      document.getElementById('status-' + p).textContent = 'Servidor offline';
+    ['instagram', 'youtube', 'tiktok'].forEach(p => {
+      document.getElementById('status-' + p).textContent = 'Server offline';
     });
   }
 }
@@ -432,10 +432,10 @@ async function loadAuthStatus() {
 async function connectPlatform(platform) {
   try {
     await fetch(API + '/api/auth/' + platform, { method: 'POST' });
-    toast('Iniciando OAuth ' + platform + '. Verifique o browser.', 'var(--accent)');
+    toast('Starting OAuth for ' + platform + '. Check your browser.', 'var(--accent)');
     setTimeout(loadAuthStatus, 8000);
   } catch(e) {
-    toast('Servidor offline.', 'var(--red)');
+    toast('Server offline.', 'var(--red)');
   }
 }
 
