@@ -1,0 +1,6 @@
+jobs.json
+auth/tokens.json
+watch_input/
+__pycache__/
+*.pyc
+.env

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>conduler</title>
+<style>
+  :root {
+    --bg:       #0f0f11;
+    --bg2:      #18181c;
+    --bg3:      #222228;
+    --border:   #2e2e36;
+    --text:     #e8e8f0;
+    --muted:    #7a7a90;
+    --accent:   #7c6af7;
+    --accent2:  #5b4fd4;
+    --green:    #3ecf8e;
+    --red:      #f06060;
+    --amber:    #f0a830;
+    --ig:       #e1306c;
+    --yt:       #ff0000;
+    --tt:       #69c9d0;
+    --radius:   10px;
+    --font:     'Segoe UI', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; min-height: 100vh; }
+
+  .app { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+  .sidebar { background: var(--bg2); border-right: 1px solid var(--border); padding: 20px 0; display: flex; flex-direction: column; gap: 4px; }
+  .sidebar-logo { padding: 0 20px 20px; font-size: 16px; font-weight: 600; color: var(--accent); letter-spacing: -.3px; }
+  .sidebar-logo span { color: var(--muted); font-weight: 400; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; cursor: pointer; color: var(--muted); transition: background .15s, color .15s; font-size: 13px; }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--bg3); color: var(--text); border-right: 2px solid var(--accent); }
+  .nav-icon { width: 16px; text-align: center; font-size: 15px; }
+
+  .main { padding: 32px; overflow-y: auto; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .page-header { margin-bottom: 28px; }
+  .page-header h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .page-header p  { color: var(--muted); font-size: 13px; }
+
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .card + .card { margin-top: 16px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; margin-bottom: 6px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .form-group input,
+  .form-group textarea,
+  .form-group select { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; color: var(--text); font-size: 13px; outline: none; transition: border .15s; font-family: var(--font); resize: vertical; }
+  .form-group input:focus,
+  .form-group textarea:focus { border-color: var(--accent); }
+  .form-group textarea { min-height: 80px; }
+
+  .platform-checks { display: flex; gap: 12px; flex-wrap: wrap; }
+  .plat-btn { display: flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg3); cursor: pointer; font-size: 13px; color: var(--muted); transition: all .15s; user-select: none; }
+  .plat-btn.selected-ig  { border-color: var(--ig);  color: var(--ig);  background: #1a0a10; }
+  .plat-btn.selected-yt  { border-color: var(--yt);  color: var(--yt);  background: #180000; }
+  .plat-btn.selected-tt  { border-color: var(--tt);  color: var(--tt);  background: #001a1b; }
+  .plat-btn:hover { border-color: var(--muted); }
+
+  .btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; transition: opacity .15s; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { opacity: .85; }
+  .btn-danger  { background: transparent; border: 1px solid var(--red); color: var(--red); padding: 5px 12px; font-size: 12px; }
+  .btn-danger:hover { background: #1a0000; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+  .job-row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .job-row:last-child { border-bottom: none; }
+  .job-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .job-meta  { font-size: 12px; color: var(--muted); }
+  .job-platforms { display: flex; gap: 5px; }
+  .dot-ig  { color: var(--ig);  font-size: 16px; }
+  .dot-yt  { color: var(--yt);  font-size: 16px; }
+  .dot-tt  { color: var(--tt);  font-size: 16px; }
+
+  .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+  .badge-pending   { background: #1a1506; color: var(--amber); border: 1px solid #3a2e08; }
+  .badge-running   { background: #0a0f1a; color: #70aaff;      border: 1px solid #1a3060; }
+  .badge-done      { background: #071510; color: var(--green);  border: 1px solid #0e3020; }
+  .badge-failed    { background: #1a0808; color: var(--red);    border: 1px solid #3a1010; }
+  .badge-cancelled { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+
+  .auth-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .auth-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; }
+  .auth-card .plat-name { font-size: 15px; font-weight: 600; margin: 10px 0 4px; }
+  .auth-card .plat-status { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+  .auth-card .plat-status.connected { color: var(--green); }
+  .auth-icon { font-size: 28px; }
+  .btn-connect { width: 100%; padding: 9px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); cursor: pointer; font-size: 13px; transition: border .15s, background .15s; }
+  .btn-connect:hover { border-color: var(--accent); background: var(--bg); }
+  .btn-connect.connected { border-color: var(--green); color: var(--green); }
+
+  .file-list { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+  .file-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg3); border-radius: 6px; padding: 10px 14px; font-size: 13px; }
+  .file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-ext  { color: var(--muted); font-size: 11px; margin-left: 6px; }
+  .folder-path { font-family: monospace; font-size: 12px; color: var(--muted); word-break: break-all; margin-top: 6px; }
+
+  #toast { position: fixed; bottom: 28px; right: 28px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 18px; font-size: 13px; opacity: 0; transition: opacity .3s; pointer-events: none; max-width: 320px; z-index: 999; }
+  #toast.show { opacity: 1; }
+
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty { text-align: center; padding: 40px 0; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">condu<span>ler</span></div>
+    <div class="nav-item active" data-page="schedule">
+      <span class="nav-icon">&#128197;</span> Agendar
+    </div>
+    <div class="nav-item" data-page="jobs">
+      <span class="nav-icon">&#128203;</span> Jobs
+    </div>
+    <div class="nav-item" data-page="watch">
+      <span class="nav-icon">&#128193;</span> Pasta monitorada
+    </div>
+    <div class="nav-item" data-page="auth">
+      <span class="nav-icon">&#128273;</span> Autenticacao
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- Agendar -->
+    <div class="page active" id="page-schedule">
+      <div class="page-header">
+        <h1>Novo agendamento</h1>
+        <p>Selecione o video, preencha os dados e escolha o horario de publicacao.</p>
+      </div>
+      <div class="card">
+        <div class="form-group">
+          <label>Arquivo de video</label>
+          <select id="sched-file" style="cursor:pointer"></select>
+        </div>
+        <div class="grid2">
+          <div class="form-group">
+            <label>Titulo</label>
+            <input id="sched-title" type="text" placeholder="Titulo do post">
+          </div>
+          <div class="form-group">
+            <label>Publicar em</label>
+            <input id="sched-datetime" type="datetime-local">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descricao / Legenda</label>
+          <textarea id="sched-desc" placeholder="Texto do post, hashtags..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Tags (separadas por virgula)</label>
+          <input id="sched-tags" type="text" placeholder="shorts, bitcoin, crypto">
+        </div>
+        <div class="form-group">
+          <label>Plataformas</label>
+          <div class="platform-checks">
+            <div class="plat-btn" data-plat="instagram" onclick="togglePlat(this)">&#128248; Instagram</div>
+            <div class="plat-btn" data-plat="youtube"   onclick="togglePlat(this)">&#9654; YouTube</div>
+            <div class="plat-btn" data-plat="tiktok"    onclick="togglePlat(this)">&#9835; TikTok</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="createJob()">Agendar publicacao</button>
+      </div>
+    </div>
+
+    <!-- Jobs -->
+    <div class="page" id="page-jobs">
+      <div class="page-header">
+        <h1>Jobs agendados</h1>
+        <p>Acompanhe o status de cada publicacao.</p>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="btn btn-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" onclick="loadJobs()">Atualizar</button>
+        <button class="btn btn-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" onclick="loadJobs('pending')">Pendentes</button>
+        <button class="btn btn-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" onclick="loadJobs('done')">Concluidos</button>
+        <button class="btn btn-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" onclick="loadJobs('failed')">Falhos</button>
+      </div>
+      <div class="card" id="jobs-container">
+        <div class="empty"><span class="spinner"></span></div>
+      </div>
+    </div>
+
+    <!-- Pasta monitorada -->
+    <div class="page" id="page-watch">
+      <div class="page-header">
+        <h1>Pasta monitorada</h1>
+        <p>Videos detectados automaticamente pelo watcher.</p>
+      </div>
+      <div class="card" id="watch-container">
+        <div class="empty"><span class="spinner"></span></div>
+      </div>
+    </div>
+
+    <!-- Autenticacao -->
+    <div class="page" id="page-auth">
+      <div class="page-header">
+        <h1>Autenticacao OAuth</h1>
+        <p>Conecte suas contas para permitir a publicacao automatica.</p>
+      </div>
+      <div class="auth-grid">
+        <div class="auth-card">
+          <div class="auth-icon">&#128248;</div>
+          <div class="plat-name" style="color:var(--ig)">Instagram</div>
+          <div class="plat-status" id="status-instagram">Verificando...</div>
+          <button class="btn-connect" id="btn-instagram" onclick="connectPlatform('instagram')">Conectar</button>
+        </div>
+        <div class="auth-card">
+          <div class="auth-icon">&#9654;</div>
+          <div class="plat-name" style="color:var(--yt)">YouTube</div>
+          <div class="plat-status" id="status-youtube">Verificando...</div>
+          <button class="btn-connect" id="btn-youtube" onclick="connectPlatform('youtube')">Conectar</button>
+        </div>
+        <div class="auth-card">
+          <div class="auth-icon">&#9835;</div>
+          <div class="plat-name" style="color:var(--tt)">TikTok</div>
+          <div class="plat-status" id="status-tiktok">Verificando...</div>
+          <button class="btn-connect" id="btn-tiktok" onclick="connectPlatform('tiktok')">Conectar</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:20px">
+        <p style="color:var(--muted);font-size:13px;line-height:1.7">
+          <strong style="color:var(--text)">Configuracao:</strong> Preencha as credenciais em
+          <code style="background:var(--bg3);padding:1px 6px;border-radius:4px">config.py</code>
+          ou defina as variaveis de ambiente antes de iniciar:<br><br>
+          <code style="background:var(--bg3);padding:6px 10px;border-radius:6px;display:block;font-size:12px;line-height:2">
+            INSTAGRAM_APP_ID &nbsp;&nbsp;&nbsp;&nbsp; INSTAGRAM_APP_SECRET<br>
+            YOUTUBE_CLIENT_ID &nbsp;&nbsp;&nbsp; YOUTUBE_CLIENT_SECRET<br>
+            TIKTOK_CLIENT_KEY &nbsp;&nbsp;&nbsp; TIKTOK_CLIENT_SECRET
+          </code>
+        </p>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'http://127.0.0.1:7071';
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    item.classList.add('active');
+    const page = item.dataset.page;
+    document.getElementById('page-' + page).classList.add('active');
+    if (page === 'jobs')     loadJobs();
+    if (page === 'watch')    loadWatchFolder();
+    if (page === 'auth')     loadAuthStatus();
+    if (page === 'schedule') loadWatchFiles();
+  });
+});
+
+function toast(msg, color='var(--text)') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.color = color;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function fmtDate(iso) {
+  if (!iso) return '-';
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+}
+function platDot(p) {
+  if (p === 'instagram') return '<span class="dot-ig">&#9679;</span>';
+  if (p === 'youtube')   return '<span class="dot-yt">&#9679;</span>';
+  if (p === 'tiktok')    return '<span class="dot-tt">&#9679;</span>';
+  return '&#9679;';
+}
+function badgeFor(status) {
+  return '<span class="badge badge-' + status + '">' + status + '</span>';
+}
+
+async function loadWatchFiles() {
+  try {
+    const r = await fetch(API + '/api/watch_folder');
+    const d = await r.json();
+    const sel = document.getElementById('sched-file');
+    sel.innerHTML = d.files.length
+      ? d.files.map(f => '<option value="' + d.folder + '/' + f + '">' + f + '</option>').join('')
+      : '<option value="">- nenhum video na pasta -</option>';
+  } catch(e) {
+    document.getElementById('sched-file').innerHTML = '<option>Servidor offline</option>';
+  }
+}
+
+const _selectedPlats = new Set();
+function togglePlat(el) {
+  const p = el.dataset.plat;
+  if (_selectedPlats.has(p)) {
+    _selectedPlats.delete(p);
+    el.className = 'plat-btn';
+  } else {
+    _selectedPlats.add(p);
+    const cls = p === 'instagram' ? 'selected-ig' : p === 'youtube' ? 'selected-yt' : 'selected-tt';
+    el.className = 'plat-btn ' + cls;
+  }
+}
+
+async function createJob() {
+  const videoPath = document.getElementById('sched-file').value;
+  const title     = document.getElementById('sched-title').value.trim();
+  const desc      = document.getElementById('sched-desc').value.trim();
+  const tagsRaw   = document.getElementById('sched-tags').value;
+  const dtLocal   = document.getElementById('sched-datetime').value;
+  const platforms = [..._selectedPlats];
+
+  if (!videoPath)      return toast('Selecione um video.', 'var(--red)');
+  if (!dtLocal)        return toast('Defina o horario de publicacao.', 'var(--red)');
+  if (!platforms.length) return toast('Selecione pelo menos uma plataforma.', 'var(--red)');
+
+  const scheduledAt = new Date(dtLocal).toISOString();
+  const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+  try {
+    const r = await fetch(API + '/api/jobs', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ video_path: videoPath, title, description: desc, tags, platforms, scheduled_at: scheduledAt }),
+    });
+    const d = await r.json();
+    if (r.ok) {
+      toast('Job criado! ID: ' + d.id.slice(0,8), 'var(--green)');
+    } else {
+      toast('Erro: ' + d.error, 'var(--red)');
+    }
+  } catch(e) {
+    toast('Servidor offline.', 'var(--red)');
+  }
+}
+
+async function loadJobs(status) {
+  const el = document.getElementById('jobs-container');
+  el.innerHTML = '<div class="empty"><span class="spinner"></span></div>';
+  try {
+    const url = status ? API + '/api/jobs?status=' + status : API + '/api/jobs';
+    const r = await fetch(url);
+    const d = await r.json();
+    if (!d.jobs.length) {
+      el.innerHTML = '<div class="empty">Nenhum job encontrado.</div>';
+      return;
+    }
+    el.innerHTML = d.jobs.map(j => {
+      const name = j.title || j.video_path.split(/[\\\/]/).pop();
+      const plats = j.platforms.map(platDot).join(' ');
+      const cancel = j.status === 'pending'
+        ? '<button class="btn btn-danger" onclick="cancelJob(\'' + j.id + '\')">Cancelar</button>'
+        : '';
+      return '<div class="job-row">'
+        + '<div>'
+        + '<div class="job-title">' + name + '</div>'
+        + '<div class="job-meta">' + fmtDate(j.scheduled_at) + ' &nbsp;&middot;&nbsp; <span class="job-platforms">' + plats + '</span></div>'
+        + '</div>'
+        + '<div>' + badgeFor(j.status) + '</div>'
+        + '<div>' + cancel + '</div>'
+        + '</div>';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="empty">Servidor offline.</div>';
+  }
+}
+
+async function cancelJob(id) {
+  try {
+    const r = await fetch(API + '/api/jobs/' + id, { method: 'DELETE' });
+    const d = await r.json();
+    if (r.ok) {
+      toast('Job cancelado.', 'var(--amber)');
+      loadJobs();
+    } else {
+      toast(d.error, 'var(--red)');
+    }
+  } catch(e) {
+    toast('Servidor offline.', 'var(--red)');
+  }
+}
+
+async function loadWatchFolder() {
+  const el = document.getElementById('watch-container');
+  el.innerHTML = '<div class="empty"><span class="spinner"></span></div>';
+  try {
+    const r = await fetch(API + '/api/watch_folder');
+    const d = await r.json();
+    const fileRows = d.files.length
+      ? d.files.map(f => '<div class="file-item"><span class="file-name">' + f + '</span></div>').join('')
+      : '<div class="empty">Nenhum video na pasta.</div>';
+    el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
+      + '<span style="font-size:13px;font-weight:500">' + d.files.length + ' video(s) detectado(s)</span>'
+      + '<button class="btn btn-sm" style="background:var(--bg3);border:1px solid var(--border);color:var(--text)" onclick="loadWatchFolder()">Atualizar</button>'
+      + '</div>'
+      + '<div class="folder-path">' + d.folder + '</div>'
+      + '<div class="file-list">' + fileRows + '</div>';
+  } catch(e) {
+    el.innerHTML = '<div class="empty">Servidor offline.</div>';
+  }
+}
+
+async function loadAuthStatus() {
+  try {
+    const r = await fetch(API + '/api/auth/status');
+    const d = await r.json();
+    ['instagram','youtube','tiktok'].forEach(p => {
+      const connected = d[p];
+      document.getElementById('status-' + p).textContent = connected ? '● Conectado' : '○ Nao conectado';
+      document.getElementById('status-' + p).className   = 'plat-status' + (connected ? ' connected' : '');
+      document.getElementById('btn-' + p).textContent    = connected ? 'Reconectar' : 'Conectar';
+      document.getElementById('btn-' + p).className      = 'btn-connect' + (connected ? ' connected' : '');
+    });
+  } catch(e) {
+    ['instagram','youtube','tiktok'].forEach(p => {
+      document.getElementById('status-' + p).textContent = 'Servidor offline';
+    });
+  }
+}
+
+async function connectPlatform(platform) {
+  try {
+    await fetch(API + '/api/auth/' + platform, { method: 'POST' });
+    toast('Iniciando OAuth ' + platform + '. Verifique o browser.', 'var(--accent)');
+    setTimeout(loadAuthStatus, 8000);
+  } catch(e) {
+    toast('Servidor offline.', 'var(--red)');
+  }
+}
+
+loadWatchFiles();
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "jobs": [
+    {
+      "id": "00000000-0000-0000-0000-000000000001",
+      "video_path": "C:/Users/panta/rotman/output/video_exemplo.mp4",
+      "title": "Bitcoin em 2025 — o que esperar?",
+      "description": "Analise rapida do mercado. #bitcoin #crypto #shorts",
+      "tags": ["bitcoin", "crypto", "shorts"],
+      "platforms": ["instagram", "youtube", "tiktok"],
+      "scheduled_at": "2025-08-01T18:00:00+00:00",
+      "status": "pending",
+      "created_at": "2025-07-31T10:00:00+00:00",
+      "results": {}
+    }
+  ]
+}
