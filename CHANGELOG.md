@@ -8,6 +8,15 @@ All notable changes to conduler are documented here.
 
 ---
 
+## [1.1] — 2026-05-05
+
+### Added
+- Rotman bridge integration — `conduler_bridge.py` in rotman now POSTs a job to
+  `POST /api/jobs` automatically when a pipeline run completes; conduler requires
+  no changes, the existing endpoint and scheduler handle it transparently
+
+---
+
 ## [1.0] — 2026-04-11
 
 ### Added
