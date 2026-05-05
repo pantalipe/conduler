@@ -1,6 +1,30 @@
-jobs.json
+# Auth tokens — contains API credentials, never commit
 auth/tokens.json
+
+# Job queue — local state, not versioned
+jobs.json
+
+# Watch folder — contains user video files
 watch_input/
+
+# Python
+venv/
+.venv/
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Environment variables
 .env
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store
