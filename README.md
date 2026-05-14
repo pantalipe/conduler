@@ -77,9 +77,31 @@ conduler/
 
 **TikTok** requires app approval through the developer portal. The flow is fully implemented but only works with an approved app.
 
+## Rotman integration
+
+Rotman notifies conduler automatically via `conduler_bridge.py` when a pipeline
+run completes. No changes are needed on the conduler side — the bridge calls
+conduler's existing `POST /api/jobs` endpoint.
+
+| Env var                  | Default                    | Description                                          |
+|--------------------------|----------------------------|------------------------------------------------------|
+| `CONDULER_URL`           | `http://127.0.0.1:7071`    | Base URL of this conduler instance                   |
+| `CONDULER_DELAY_MINUTES` | `30`                       | Minutes from pipeline completion before publishing   |
+
+Channel-to-platform mapping (defined in `conduler_bridge.py`):
+
+| Channel         | Platforms                  |
+|-----------------|----------------------------|
+| bitcoinfacil    | YouTube, Instagram         |
+| pandapoints     | YouTube, TikTok            |
+
+If conduler is unreachable the pipeline still completes — a warning is logged
+and the video remains on disk for manual scheduling via the UI.
+
 ## Roadmap
 
+- [x] Rotman integration — rotman's `conduler_bridge.py` POSTs finished videos to
+      `POST /api/jobs` on pipeline completion (HTTP handoff, not shared folder)
 - [ ] Direct upload support for Instagram (no public URL required)
 - [ ] Automatic token refresh on expiry
 - [ ] Webhook notification after publishing
-- [ ] Direct integration with Rotman via shared output folder
