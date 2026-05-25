@@ -17,6 +17,7 @@ import config
 from watcher import FolderWatcher
 from scheduler import Scheduler
 from publisher_router import publish_job
+from schedule_resolver import next_slot, load_schedules
 
 logging.basicConfig(
     level=logging.INFO,
@@ -27,14 +28,110 @@ logger = logging.getLogger("main")
 scheduler = Scheduler(publisher_fn=publish_job)
 
 
+# ---------------------------------------------------------------------------
+# Helpers de auto-agendamento
+# ---------------------------------------------------------------------------
+
+def _parse_channel(filename: str) -> str | None:
+    """
+    Extrai o canal do nome do arquivo.
+    Convenção: {channel}_{qualquer_coisa}.ext
+    Ex: bitcoinfacil_20260525_hook.mp4  →  "bitcoinfacil"
+        pandapoints_defi-intro.mp4      →  "pandapoints"
+    Retorna None se o prefixo não bater com nenhum canal conhecido.
+    """
+    try:
+        schedules   = load_schedules()
+        known       = set(schedules["channels"].keys())
+        stem        = os.path.splitext(filename)[0]           # remove extensão
+        prefix      = stem.split("_")[0].lower()              # primeiro segmento
+        return prefix if prefix in known else None
+    except Exception:
+        return None
+
+
+def _read_sidecar(video_path: str) -> dict:
+    """
+    Lê metadados opcionais de um sidecar JSON com mesmo stem do vídeo.
+    Ex: bitcoinfacil_hook.mp4  →  bitcoinfacil_hook.json
+    Campos suportados: title, description, tags (lista de strings).
+    """
+    stem     = os.path.splitext(video_path)[0]
+    sidecar  = stem + ".json"
+    if not os.path.exists(sidecar):
+        return {}
+    try:
+        with open(sidecar, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        logger.info("Sidecar lido: %s", sidecar)
+        return data
+    except Exception as e:
+        logger.warning("Erro ao ler sidecar %s: %s", sidecar, e)
+        return {}
+
+
 # ------------------------------------------------------------------
 # Callback do Watcher: novo vídeo detectado
 # ------------------------------------------------------------------
 
-def on_new_video(filepath):
-    """Chamado pelo watcher quando um novo vídeo aparece na pasta."""
-    logger.info("Novo vídeo na fila de espera: %s", filepath)
-    # Apenas registra — o usuário agenda via UI / API
+def on_new_video(filepath: str):
+    """
+    Chamado pelo watcher quando um novo vídeo aparece na pasta.
+    Auto-agenda um job por plataforma no próximo slot ótimo do canal.
+    """
+    filename = os.path.basename(filepath)
+    channel  = _parse_channel(filename)
+
+    if not channel:
+        logger.warning(
+            "Auto-agendamento ignorado — não foi possível identificar o canal em '%s'. "
+            "Use o prefixo do canal no nome do arquivo: {canal}_{slug}.mp4",
+            filename,
+        )
+        return
+
+    meta = _read_sidecar(filepath)
+    title       = meta.get("title", "")
+    description = meta.get("description", "")
+    tags        = meta.get("tags", [])
+
+    schedules        = load_schedules()
+    channel_cfg      = schedules["channels"][channel]
+    platforms        = channel_cfg.get("platforms", [])
+
+    created, skipped = [], []
+
+    for platform in platforms:
+        try:
+            slot    = next_slot(channel, platform)
+            job_id  = scheduler.add_job(
+                video_path   = filepath,
+                platforms    = [platform],
+                scheduled_at = slot,
+                title        = title,
+                description  = description,
+                tags         = tags,
+                channel      = channel,
+            )
+            created.append(f"{platform}@{slot}")
+            logger.info(
+                "Job auto-criado  [%s]  canal=%s  plataforma=%s  slot=%s",
+                job_id[:8], channel, platform, slot,
+            )
+        except Exception as e:
+            skipped.append(platform)
+            logger.error(
+                "Falha ao agendar %s/%s para '%s': %s",
+                channel, platform, filename, e,
+            )
+
+    if created:
+        logger.info(
+            "Auto-agendamento concluído para '%s' → %s",
+            filename, " | ".join(created),
+        )
+    if skipped:
+        logger.warning("Plataformas sem slot disponível: %s", skipped)
 
 
 # ------------------------------------------------------------------

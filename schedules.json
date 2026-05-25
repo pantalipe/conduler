@@ -1,0 +1,57 @@
+{
+  "_doc": {
+    "weekday": "0=Segunda 1=Terça 2=Quarta 3=Quinta 4=Sexta 5=Sábado 6=Domingo",
+    "time": "Horário local BRT (America/Sao_Paulo)",
+    "gap_hours": "Intervalo mínimo entre posts na mesma plataforma+canal (evita flood)",
+    "source": "Dados agregados SocialPilot/Buffer/IQFluence 2026 — ajustar com analytics próprio após 30 dias"
+  },
+  "timezone": "America/Sao_Paulo",
+  "gap_hours": 23,
+  "channels": {
+    "bitcoinfacil": {
+      "language": "pt-BR",
+      "description": "Canal de educação cripto em português",
+      "platforms": ["tiktok", "instagram", "youtube"],
+      "schedule": {
+        "tiktok": [
+          {"weekday": 0, "time": "10:00", "note": "Segunda — janela manhã"},
+          {"weekday": 1, "time": "10:00", "note": "Terça — melhor dia mid-week"},
+          {"weekday": 2, "time": "10:00", "note": "Quarta — pico de engajamento"},
+          {"weekday": 3, "time": "10:00", "note": "Quinta — segunda melhor janela"},
+          {"weekday": 4, "time": "10:00", "note": "Sexta — ainda forte"}
+        ],
+        "instagram": [
+          {"weekday": 1, "time": "09:00", "note": "Terça — janela prime Reels"},
+          {"weekday": 2, "time": "09:00", "note": "Quarta — mid-week peak"},
+          {"weekday": 3, "time": "09:00", "note": "Quinta — consistente"},
+          {"weekday": 4, "time": "09:00", "note": "Sexta — antes do fim de semana"}
+        ],
+        "youtube": [
+          {"weekday": 2, "time": "15:00", "note": "Quarta — 2-3h antes do pico noturno (~19h)"},
+          {"weekday": 3, "time": "15:00", "note": "Quinta — segundo melhor dia long-form"}
+        ]
+      }
+    },
+    "pandapoints": {
+      "language": "en",
+      "description": "PandaPoints DeFi content channel (English)",
+      "platforms": ["tiktok", "instagram", "youtube"],
+      "schedule": {
+        "tiktok": [
+          {"weekday": 1, "time": "10:00", "note": "Tuesday — strongest mid-week window"},
+          {"weekday": 3, "time": "10:00", "note": "Thursday — second best day"},
+          {"weekday": 5, "time": "11:00", "note": "Saturday — highest organic reach (Buffer 7M study)"}
+        ],
+        "instagram": [
+          {"weekday": 1, "time": "09:00", "note": "Tuesday — top engagement window"},
+          {"weekday": 2, "time": "09:00", "note": "Wednesday — consistent mid-week"},
+          {"weekday": 3, "time": "09:00", "note": "Thursday — strong before weekend"}
+        ],
+        "youtube": [
+          {"weekday": 3, "time": "15:00", "note": "Thursday — mid-week long-form peak"},
+          {"weekday": 6, "time": "11:00", "note": "Sunday — best day YouTube 2026 (RecurPost 2M study)"}
+        ]
+      }
+    }
+  }
+}

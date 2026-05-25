@@ -65,7 +65,7 @@ class Scheduler:
     # CRUD de jobs
     # ------------------------------------------------------------------
 
-    def add_job(self, video_path, platforms, scheduled_at, title="", description="", tags=None):
+    def add_job(self, video_path, platforms, scheduled_at, title="", description="", tags=None, channel=""):
         """
         Cria um novo job e retorna seu ID.
         scheduled_at: string ISO 8601 UTC  ex: "2025-08-01T18:00:00+00:00"
@@ -77,6 +77,7 @@ class Scheduler:
 
         job = {
             "id":           str(uuid.uuid4()),
+            "channel":      channel,
             "video_path":   video_path,
             "title":        title,
             "description":  description,
