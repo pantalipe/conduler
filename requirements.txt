@@ -1,0 +1,10 @@
+# conduler dependencies
+#
+# The rest of the codebase is pure stdlib (http.server, threading, json,
+# urllib, uuid, zoneinfo). tzdata is the only third-party requirement.
+#
+# tzdata is needed on Windows because the OS does not ship the IANA
+# timezone database that zoneinfo relies on for named zones such as
+# "America/Sao_Paulo". On Linux/macOS this package is optional.
+
+tzdata>=2026.1
