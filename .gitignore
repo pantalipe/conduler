@@ -1,6 +1,9 @@
 # Auth tokens — contains API credentials, never commit
 auth/tokens.json
 
+# Google OAuth client secret — never commit
+client_secret_*.apps.googleusercontent.com.json
+
 # Job queue — local state, not versioned
 jobs.json
 
@@ -19,6 +22,9 @@ build/
 
 # Environment variables
 .env
+.env.local
+.env.production
+# .env.example is intentionally NOT ignored — it is committed as documentation
 
 # IDE
 .idea/
