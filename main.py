@@ -9,6 +9,7 @@ Ponto de entrada do conduler.
 import json
 import logging
 import os
+import shutil
 import threading
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -48,6 +49,45 @@ def _parse_channel(filename: str) -> str | None:
         return prefix if prefix in known else None
     except Exception:
         return None
+
+
+def _archive_video(video_path: str, channel: str) -> str:
+    """
+    Move o vídeo (e seu sidecar JSON, se existir) de watch_input/ para
+    watch_input/processed/{channel}/, retornando o novo caminho do vídeo.
+
+    Isso é o que garante que o watcher nunca reprocesse o arquivo após
+    um restart do conduler — watch_input é sempre re-escaneado do zero,
+    então "já visto" precisa ser persistido tirando o arquivo da pasta
+    monitorada, não apenas guardado em memória. Também faz os jobs
+    agendados apontarem para um caminho estável em vez do arquivo
+    original, que deixa de existir.
+    """
+    dest_dir = os.path.join(config.PROCESSED_FOLDER, channel)
+    os.makedirs(dest_dir, exist_ok=True)
+
+    filename    = os.path.basename(video_path)
+    sidecar_src = os.path.splitext(video_path)[0] + ".json"
+    dest_video  = os.path.join(dest_dir, filename)
+
+    try:
+        shutil.move(video_path, dest_video)
+    except OSError as e:
+        logger.error(
+            "Falha ao arquivar vídeo '%s': %s — mantendo em watch_input (risco de reprocessamento).",
+            filename, e,
+        )
+        return video_path
+
+    if os.path.exists(sidecar_src):
+        dest_sidecar = os.path.join(dest_dir, os.path.basename(sidecar_src))
+        try:
+            shutil.move(sidecar_src, dest_sidecar)
+        except OSError as e:
+            logger.warning("Falha ao arquivar sidecar de '%s': %s", filename, e)
+
+    logger.info("Vídeo arquivado: %s → %s", filename, dest_video)
+    return dest_video
 
 
 def _read_sidecar(video_path: str) -> dict:
@@ -94,6 +134,11 @@ def on_new_video(filepath: str):
     title       = meta.get("title", "")
     description = meta.get("description", "")
     tags        = meta.get("tags", [])
+
+    # Arquiva o vídeo (e sidecar) para fora de watch_input ANTES de
+    # agendar: garante que um restart do conduler não vai re-detectar e
+    # re-agendar este arquivo, e que os jobs referenciem o caminho final.
+    filepath = _archive_video(filepath, channel)
 
     schedules        = load_schedules()
     channel_cfg      = schedules["channels"][channel]

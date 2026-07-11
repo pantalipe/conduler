@@ -6,6 +6,19 @@ All notable changes to conduler are documented here.
 
 ## [Unreleased]
 
+### Fixed
+- **Duplicação de posts em restart**: `watcher.py` mantinha os arquivos já
+  vistos apenas em memória (`seen`), então reiniciar o conduler fazia o
+  watcher re-escanear `watch_input/` do zero e recriar jobs para vídeos
+  já agendados. Corrigido movendo cada vídeo (e seu sidecar JSON) para
+  `watch_input/processed/{channel}/` assim que os jobs são criados
+  (`_archive_video` em `main.py`), tirando-o da pasta monitorada.
+- **Sem dedup em `Scheduler.add_job`**: adicionada checagem que ignora
+  criação de job duplicado quando já existe um job pending/running/done
+  para o mesmo `video_path` + mesmo conjunto de `platforms`. Segunda
+  camada de proteção contra duplicação, cobrindo também o bridge do
+  rotman (`conduler_bridge.py`) e chamadas repetidas da API.
+
 ---
 
 ## [1.1] — 2026-05-05

@@ -11,6 +11,12 @@ WATCH_FOLDER = os.environ.get(
 )
 POLL_INTERVAL = 10  # segundos entre cada varredura
 
+# Pasta para onde vídeos já agendados são movidos, para que o watcher
+# nunca os reprocesse após um restart (watch_input é sempre escaneado
+# do zero — "visto" precisa ser persistido movendo o arquivo, não
+# apenas guardado em memória).
+PROCESSED_FOLDER = os.path.join(WATCH_FOLDER, "processed")
+
 # --- Extensões de vídeo aceitas ---
 VIDEO_EXTENSIONS = {".mp4", ".mov", ".avi", ".mkv"}
 

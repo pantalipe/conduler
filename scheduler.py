@@ -75,6 +75,22 @@ class Scheduler:
         if invalid:
             raise ValueError(f"Plataformas inválidas: {invalid}")
 
+        # Dedup: evita criar um job duplicado para o mesmo vídeo + mesmo
+        # conjunto de plataformas (protege contra re-scans do watcher,
+        # reenvios do bridge do rotman, ou chamadas repetidas da API).
+        with self._lock:
+            for existing in self._jobs.values():
+                if (
+                    existing["video_path"] == video_path
+                    and existing["platforms"] == platforms
+                    and existing["status"] in (STATUS_PENDING, STATUS_RUNNING, STATUS_DONE)
+                ):
+                    logger.info(
+                        "Job duplicado ignorado para '%s' [%s] — já existe %s (status=%s)",
+                        video_path, platforms, existing["id"][:8], existing["status"],
+                    )
+                    return existing["id"]
+
         job = {
             "id":           str(uuid.uuid4()),
             "channel":      channel,
