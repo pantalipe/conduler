@@ -1,5 +1,6 @@
 # Auth tokens — contains API credentials, never commit
 auth/tokens.json
+insta.txt
 
 # Google OAuth client secret — never commit
 client_secret_*.apps.googleusercontent.com.json
