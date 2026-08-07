@@ -32,6 +32,9 @@ OAUTH_REDIRECT_URI  = f"http://localhost:{OAUTH_REDIRECT_PORT}/callback"
 # --- Plataformas disponíveis ---
 PLATFORMS = ["instagram", "youtube", "tiktok"]
 
+# --- Link da dapp usado nas descrições publicadas (com UTM, ver utm.py) ---
+DAPP_BASE_URL = os.environ.get("DAPP_BASE_URL", "https://pandapointscoin.com")
+
 # --- Credenciais OAuth (preencher após criar apps nas plataformas) ---
 # Instagram / Facebook
 INSTAGRAM_APP_ID     = os.environ.get("INSTAGRAM_APP_ID", "")
