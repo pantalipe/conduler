@@ -281,6 +281,7 @@ class Handler(BaseHTTPRequestHandler):
                     title        = data.get("title", ""),
                     description  = data.get("description", ""),
                     tags         = data.get("tags", []),
+                    channel      = data.get("channel", ""),
                 )
                 _json_response(self, 201, {"id": job_id})
             except (KeyError, ValueError) as e:

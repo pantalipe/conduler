@@ -2,6 +2,7 @@
   "jobs": [
     {
       "id": "00000000-0000-0000-0000-000000000001",
+      "channel": "bitcoinfacil",
       "video_path": "C:/Users/panta/rotman/output/video_exemplo.mp4",
       "title": "Bitcoin em 2025 — o que esperar?",
       "description": "Analise rapida do mercado. #bitcoin #crypto #shorts",

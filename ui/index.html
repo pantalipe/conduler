@@ -155,6 +155,13 @@
           </div>
         </div>
         <div class="form-group">
+          <label>Channel</label>
+          <select id="sched-channel">
+            <option value="bitcoinfacil">bitcoinfacil</option>
+            <option value="pandapoints">pandapoints</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>Description / Caption</label>
           <textarea id="sched-desc" placeholder="Post text, hashtags..."></textarea>
         </div>
@@ -316,6 +323,7 @@ function togglePlat(el) {
 async function createJob() {
   const videoPath = document.getElementById('sched-file').value;
   const title     = document.getElementById('sched-title').value.trim();
+  const channel   = document.getElementById('sched-channel').value;
   const desc      = document.getElementById('sched-desc').value.trim();
   const tagsRaw   = document.getElementById('sched-tags').value;
   const dtLocal   = document.getElementById('sched-datetime').value;
@@ -332,7 +340,7 @@ async function createJob() {
     const r = await fetch(API + '/api/jobs', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ video_path: videoPath, title, description: desc, tags, platforms, scheduled_at: scheduledAt }),
+      body: JSON.stringify({ video_path: videoPath, title, channel, description: desc, tags, platforms, scheduled_at: scheduledAt }),
     });
     const d = await r.json();
     if (r.ok) {
