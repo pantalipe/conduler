@@ -30,6 +30,7 @@ def _description_with_utm_link(job: dict, platform: str) -> str:
         channel=job.get("channel", ""),
         title=job.get("title", ""),
         job_id=job.get("id", ""),
+        cta=job.get("cta", ""),
     )
     description = job.get("description", "")
     return f"{description}\n\n{link}" if description else link

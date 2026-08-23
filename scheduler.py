@@ -11,7 +11,9 @@ import logging
 import threading
 import time
 from datetime import datetime, timezone
-from config import JOBS_FILE, PLATFORMS
+import config
+from config import PLATFORMS
+from cta import VALID_CTAS
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +46,7 @@ class Scheduler:
 
     def _load(self):
         try:
-            with open(JOBS_FILE, "r", encoding="utf-8") as f:
+            with open(config.JOBS_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
             self._jobs = {j["id"]: j for j in data.get("jobs", [])}
             logger.info("Jobs carregados: %d", len(self._jobs))
@@ -56,7 +58,7 @@ class Scheduler:
 
     def _save(self):
         try:
-            with open(JOBS_FILE, "w", encoding="utf-8") as f:
+            with open(config.JOBS_FILE, "w", encoding="utf-8") as f:
                 json.dump({"jobs": list(self._jobs.values())}, f, indent=2, ensure_ascii=False)
         except Exception as e:
             logger.error("Erro ao salvar jobs.json: %s", e)
@@ -65,15 +67,19 @@ class Scheduler:
     # CRUD de jobs
     # ------------------------------------------------------------------
 
-    def add_job(self, video_path, platforms, scheduled_at, title="", description="", tags=None, channel=""):
+    def add_job(self, video_path, platforms, scheduled_at, title="", description="", tags=None, channel="", cta=""):
         """
         Cria um novo job e retorna seu ID.
         scheduled_at: string ISO 8601 UTC  ex: "2025-08-01T18:00:00+00:00"
         platforms: lista de strings, ex: ["instagram", "youtube"]
+        cta: um dos ids de cta.VALID_CTAS, ou "" (job antigo / sem CTA
+             declarado — publisher_router cai de volta no link raiz).
         """
         invalid = [p for p in platforms if p not in PLATFORMS]
         if invalid:
             raise ValueError(f"Plataformas inválidas: {invalid}")
+        if cta and cta not in VALID_CTAS:
+            raise ValueError(f"cta inválido: '{cta}'. Deve ser um de: {sorted(VALID_CTAS)}")
 
         # Dedup: evita criar um job duplicado para o mesmo vídeo + mesmo
         # conjunto de plataformas (protege contra re-scans do watcher,
@@ -94,6 +100,7 @@ class Scheduler:
         job = {
             "id":           str(uuid.uuid4()),
             "channel":      channel,
+            "cta":          cta,
             "video_path":   video_path,
             "title":        title,
             "description":  description,

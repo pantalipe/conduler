@@ -11,6 +11,7 @@ from urllib.parse import urlsplit, parse_qs
 
 import utm
 import publisher_router
+import cta as cta_module
 
 
 def test_build_utm_url_basic():
@@ -64,6 +65,36 @@ def test_build_video_utm_url_falls_back_to_job_id():
     )
     q = parse_qs(urlsplit(url).query)
     assert q["utm_content"] == ["abcd1234"], url
+
+
+def test_build_video_utm_url_uses_cta_path():
+    url = utm.build_video_utm_url(
+        "https://pandapointscoin.com", platform="youtube", channel="pandapoints",
+        title="Create your wallet", job_id="abcd1234", cta="create_wallet",
+    )
+    assert urlsplit(url).path == "/wallet", url
+
+
+def test_build_video_utm_url_no_cta_keeps_root():
+    url = utm.build_video_utm_url(
+        "https://pandapointscoin.com", platform="youtube", channel="pandapoints",
+        title="No cta here", job_id="abcd1234",
+    )
+    assert urlsplit(url).path in ("", "/"), url
+
+
+def test_build_video_utm_url_unknown_cta_keeps_root():
+    url = utm.build_video_utm_url(
+        "https://pandapointscoin.com", platform="youtube", channel="pandapoints",
+        title="Bogus cta", job_id="abcd1234", cta="not_a_real_cta",
+    )
+    assert urlsplit(url).path in ("", "/"), url
+
+
+def test_cta_destinations_cover_all_valid_ctas():
+    """Every id in cta.VALID_CTAS must resolve to a non-empty path — no silent gaps."""
+    for cta_id in cta_module.VALID_CTAS:
+        assert cta_module.resolve_cta_path(cta_id), f"missing destination for cta '{cta_id}'"
 
 
 def test_publish_job_uses_distinct_link_per_platform():
@@ -120,6 +151,32 @@ def test_publish_job_unknown_platform_error():
     assert "não implementado" in results["unknown_platform"]["error"]
 
 
+def test_publish_job_passes_cta_through_to_link():
+    """A job with a declared cta must publish a link pointing at that CTA's path."""
+    captured = {}
+
+    def fake_publisher(job):
+        captured["description"] = job["description"]
+        return {"ok": True, "url": "https://example.com/post", "error": ""}
+
+    original_publishers = dict(publisher_router._PUBLISHERS)
+    publisher_router._PUBLISHERS = {"youtube": fake_publisher}
+    try:
+        job = {
+            "id": "job-cta-1",
+            "channel": "pandapoints",
+            "cta": "try_swap",
+            "title": "Buy and sell PandaPoints",
+            "description": "Learn how to swap.",
+            "platforms": ["youtube"],
+        }
+        publisher_router.publish_job(job)
+        link = captured["description"].splitlines()[-1]
+        assert urlsplit(link).path == "/bs", link
+    finally:
+        publisher_router._PUBLISHERS = original_publishers
+
+
 ALL_TESTS = [
     test_build_utm_url_basic,
     test_build_utm_url_with_content,
@@ -127,8 +184,13 @@ ALL_TESTS = [
     test_slugify,
     test_build_video_utm_url_uses_title_slug,
     test_build_video_utm_url_falls_back_to_job_id,
+    test_build_video_utm_url_uses_cta_path,
+    test_build_video_utm_url_no_cta_keeps_root,
+    test_build_video_utm_url_unknown_cta_keeps_root,
+    test_cta_destinations_cover_all_valid_ctas,
     test_publish_job_uses_distinct_link_per_platform,
     test_publish_job_unknown_platform_error,
+    test_publish_job_passes_cta_through_to_link,
 ]
 
 

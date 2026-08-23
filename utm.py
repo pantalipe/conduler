@@ -11,6 +11,8 @@ Stdlib only (urllib.parse, re) — no external dependencies.
 import re
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
+from cta import resolve_cta_path
+
 
 def slugify(text: str, max_len: int = 60) -> str:
     """
@@ -39,7 +41,7 @@ def build_utm_url(base_url: str, source: str, medium: str, campaign: str, conten
     return urlunsplit((parts.scheme, parts.netloc, parts.path, new_query, parts.fragment))
 
 
-def build_video_utm_url(base_url: str, platform: str, channel: str, title: str = "", job_id: str = "") -> str:
+def build_video_utm_url(base_url: str, platform: str, channel: str, title: str = "", job_id: str = "", cta: str = "") -> str:
     """
     Convenience wrapper for the conduler publishing flow:
       - utm_source   = platform ('youtube' / 'instagram' / 'tiktok') — the
@@ -49,8 +51,20 @@ def build_video_utm_url(base_url: str, platform: str, channel: str, title: str =
       - utm_content  = slugified title, falling back to a short job id
                         so every video is still distinguishable even
                         without a usable title
+
+    `cta` selects which page on the dapp the link actually points to (see
+    cta.py) — e.g. cta="create_wallet" links to base_url + "/wallet"
+    instead of the bare root. Empty/unknown cta falls back to base_url
+    unchanged, so callers that don't pass one keep today's behavior.
     """
     content = slugify(title) or (job_id[:8] if job_id else "")
+    dest_path = resolve_cta_path(cta)
+    if dest_path:
+        parts = urlsplit(base_url)
+        if dest_path.startswith("http://") or dest_path.startswith("https://"):
+            base_url = dest_path
+        else:
+            base_url = urlunsplit((parts.scheme, parts.netloc, dest_path, "", ""))
     return build_utm_url(
         base_url,
         source=platform,

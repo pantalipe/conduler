@@ -94,7 +94,9 @@ def _read_sidecar(video_path: str) -> dict:
     """
     Lê metadados opcionais de um sidecar JSON com mesmo stem do vídeo.
     Ex: bitcoinfacil_hook.mp4  →  bitcoinfacil_hook.json
-    Campos suportados: title, description, tags (lista de strings).
+    Campos suportados: title, description, tags (lista de strings), cta
+    (um dos ids de cta.VALID_CTAS, declarado pelo Rotman na criação do
+    vídeo — ver conduler_bridge.schedule_video no lado do rotman).
     """
     stem     = os.path.splitext(video_path)[0]
     sidecar  = stem + ".json"
@@ -134,6 +136,7 @@ def on_new_video(filepath: str):
     title       = meta.get("title", "")
     description = meta.get("description", "")
     tags        = meta.get("tags", [])
+    cta         = meta.get("cta", "")
 
     # Arquiva o vídeo (e sidecar) para fora de watch_input ANTES de
     # agendar: garante que um restart do conduler não vai re-detectar e
@@ -157,6 +160,7 @@ def on_new_video(filepath: str):
                 description  = description,
                 tags         = tags,
                 channel      = channel,
+                cta          = cta,
             )
             created.append(f"{platform}@{slot}")
             logger.info(
@@ -274,6 +278,13 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/jobs":
             data = self._read_body()
             try:
+                channel = data.get("channel", "")
+                if not channel:
+                    raise ValueError("Campo 'channel' é obrigatório — sem ele o job cai em utm_campaign=unknown.")
+                known_channels = set(load_schedules()["channels"].keys())
+                if channel not in known_channels:
+                    raise ValueError(f"Canal desconhecido: '{channel}'. Deve ser um de: {sorted(known_channels)}")
+
                 job_id = scheduler.add_job(
                     video_path   = data["video_path"],
                     platforms    = data["platforms"],
@@ -281,7 +292,8 @@ class Handler(BaseHTTPRequestHandler):
                     title        = data.get("title", ""),
                     description  = data.get("description", ""),
                     tags         = data.get("tags", []),
-                    channel      = data.get("channel", ""),
+                    channel      = channel,
+                    cta          = data.get("cta", ""),
                 )
                 _json_response(self, 201, {"id": job_id})
             except (KeyError, ValueError) as e:
