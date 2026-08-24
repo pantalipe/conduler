@@ -35,6 +35,18 @@ PLATFORMS = ["instagram", "youtube", "tiktok"]
 # --- Link da dapp usado nas descrições publicadas (com UTM, ver utm.py) ---
 DAPP_BASE_URL = os.environ.get("DAPP_BASE_URL", "https://pandapointscoin.com")
 
+# --- Telegram community groups ---
+# Public groups linked from the "join_community" CTA (see cta.py) via the
+# /hub page on the dapp — hub.tsx picks between them by the `from=` channel
+# forwarded in the URL. Also registered in gitmanager/global_config.json
+# (`panda config sync`) as the shared source of truth across repos.
+TELEGRAM_COMMUNITY_URL_PT = os.environ.get(
+    "TELEGRAM_COMMUNITY_URL_PT", "https://t.me/+ZS3guglqYLJiOGEx"
+)
+TELEGRAM_COMMUNITY_URL_EN = os.environ.get(
+    "TELEGRAM_COMMUNITY_URL_EN", "https://t.me/+deIOtxE00LdhNWZh"
+)
+
 # --- Credenciais OAuth (preencher após criar apps nas plataformas) ---
 # Instagram / Facebook
 INSTAGRAM_APP_ID     = os.environ.get("INSTAGRAM_APP_ID", "")

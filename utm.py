@@ -58,7 +58,7 @@ def build_video_utm_url(base_url: str, platform: str, channel: str, title: str =
     unchanged, so callers that don't pass one keep today's behavior.
     """
     content = slugify(title) or (job_id[:8] if job_id else "")
-    dest_path = resolve_cta_path(cta)
+    dest_path = resolve_cta_path(cta, channel)
     if dest_path:
         parts = urlsplit(base_url)
         if dest_path.startswith("http://") or dest_path.startswith("https://"):

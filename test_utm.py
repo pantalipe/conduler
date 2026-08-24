@@ -97,6 +97,36 @@ def test_cta_destinations_cover_all_valid_ctas():
         assert cta_module.resolve_cta_path(cta_id), f"missing destination for cta '{cta_id}'"
 
 
+def test_resolve_cta_path_join_community_forwards_channel():
+    """join_community deep-links to /hub with the video's channel, so hub.tsx
+    can pick the right-language Telegram group (bitcoinfacil -> PT, pandapoints -> EN)."""
+    assert cta_module.resolve_cta_path("join_community", "bitcoinfacil") == "/hub?from=bitcoinfacil"
+    assert cta_module.resolve_cta_path("join_community", "pandapoints") == "/hub?from=pandapoints"
+
+
+def test_resolve_cta_path_join_community_no_channel_omits_from():
+    assert cta_module.resolve_cta_path("join_community") == "/hub"
+    assert cta_module.resolve_cta_path("join_community", "") == "/hub"
+
+
+def test_resolve_cta_path_channel_ignored_for_other_ctas():
+    """Only join_community forwards the channel; other CTAs' paths are untouched by it."""
+    assert cta_module.resolve_cta_path("create_wallet", "bitcoinfacil") == cta_module.resolve_cta_path("create_wallet")
+    assert cta_module.resolve_cta_path("try_swap", "pandapoints") == cta_module.resolve_cta_path("try_swap")
+
+
+def test_build_video_utm_url_join_community_forwards_channel_to_hub():
+    url = utm.build_video_utm_url(
+        "https://pandapointscoin.com", platform="youtube", channel="bitcoinfacil",
+        title="Join our community", job_id="abcd1234", cta="join_community",
+    )
+    parts = urlsplit(url)
+    assert parts.path == "/hub", url
+    q = parse_qs(parts.query)
+    assert q["from"] == ["bitcoinfacil"], url
+    assert q["utm_campaign"] == ["bitcoinfacil"], url
+
+
 def test_publish_job_uses_distinct_link_per_platform():
     """
     Same job posted to 3 platforms must get 3 different utm_source values
@@ -188,6 +218,10 @@ ALL_TESTS = [
     test_build_video_utm_url_no_cta_keeps_root,
     test_build_video_utm_url_unknown_cta_keeps_root,
     test_cta_destinations_cover_all_valid_ctas,
+    test_resolve_cta_path_join_community_forwards_channel,
+    test_resolve_cta_path_join_community_no_channel_omits_from,
+    test_resolve_cta_path_channel_ignored_for_other_ctas,
+    test_build_video_utm_url_join_community_forwards_channel_to_hub,
     test_publish_job_uses_distinct_link_per_platform,
     test_publish_job_unknown_platform_error,
     test_publish_job_passes_cta_through_to_link,

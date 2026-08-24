@@ -28,13 +28,25 @@ DEFAULT_CTA = "join_community"
 VALID_CTAS = frozenset(CTA_DESTINATIONS.keys())
 
 
-def resolve_cta_path(cta):
+def resolve_cta_path(cta, channel=""):
     """
     Returns the dApp path (or absolute URL) for a given cta id.
     Unknown or empty cta falls back to the root path ("") so publishing
     never breaks over a bad/missing cta — it just loses the CTA-specific
     targeting and links to DAPP_BASE_URL as before.
+
+    For "join_community", the video's channel is forwarded as a `from=`
+    query param on the /hub path. hub.tsx (pandapoints-dapp) reads it to
+    pick which language's Telegram group to feature — bitcoinfacil -> PT,
+    pandapoints -> EN — instead of pointing at Telegram directly, so the
+    on-screen CTA label ("join the community at pandapointscoin.com", see
+    rotman/core/cta.py) stays accurate. No channel means hub falls back to
+    its own default (EN).
     """
     if not cta:
         return ""
-    return CTA_DESTINATIONS.get(cta, "")
+    path = CTA_DESTINATIONS.get(cta, "")
+    if path and cta == "join_community" and channel:
+        separator = "&" if "?" in path else "?"
+        path = f"{path}{separator}from={channel}"
+    return path
